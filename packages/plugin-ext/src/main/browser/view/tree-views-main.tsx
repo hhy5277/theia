@@ -40,7 +40,7 @@ import { MenuPath } from '@theia/core/lib/common/menu';
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 import { ContextKeyService, ContextKey } from '@theia/core/lib/browser/context-key-service';
-import { SelectionService, Emitter, Event } from '@theia/core/lib/common';
+import { SelectionService } from '@theia/core/lib/common';
 
 export const TREE_NODE_HYPERLINK = 'theia-TreeNodeHyperlink';
 export const VIEW_ITEM_CONTEXT_MENU: MenuPath = ['view-item-context-menu'];
@@ -126,15 +126,12 @@ export class TreeViewsMainImpl implements TreeViewsMain {
             this.proxy.$setExpanded(treeViewId, event.id, event.expanded);
         });
 
-        treeViewWidget.onSelectionChanged(event => {
-            this.proxy.$setSelection(treeViewId, event.node.id, event.contextSelection);
-        });
-
         treeViewWidget.model.onSelectionChanged(event => {
             if (event.length === 1) {
                 const treeItemId = event[0].id;
                 const [, contextValue = ''] = treeItemId.split('/');
 
+                this.proxy.$setSelection(treeViewId, treeItemId, treeViewWidget.contextSelection);
                 this.viewItemCtxKey.set(contextValue);
             } else {
                 this.viewItemCtxKey.set('');
@@ -231,7 +228,7 @@ export class TreeViewDataProviderMain {
 @injectable()
 export class TreeViewWidget extends TreeWidget {
 
-    protected readonly onSelectionChangedEmitter = new Emitter<SelectionEventHandler>();
+    protected _contextSelection = false;
 
     constructor(
         @inject(TreeProps) readonly treeProps: TreeProps,
@@ -261,31 +258,16 @@ export class TreeViewWidget extends TreeWidget {
         });
     }
 
-    dispose(): void {
-        this.onSelectionChangedEmitter.dispose();
-    }
-
-    get onSelectionChanged(): Event<SelectionEventHandler> {
-        return this.onSelectionChangedEmitter.event;
-    }
-
-    protected fireSelectionChanged(node: SelectableTreeNode, contextSelection: boolean): void {
-        this.onSelectionChangedEmitter.fire({node: node, contextSelection: contextSelection} as SelectionEventHandler);
-    }
-
-    protected handleClickEvent(node: TreeNode | undefined, event: React.MouseEvent<HTMLElement>): void {
-        super.handleClickEvent(node, event);
-
-        if (SelectableTreeNode.is(node)) {
-            this.fireSelectionChanged(node, false);
-        }
+    get contextSelection(): boolean {
+        return this._contextSelection;
     }
 
     protected handleContextMenuEvent(node: TreeNode | undefined, event: React.MouseEvent<HTMLElement>): void {
-        super.handleContextMenuEvent(node, event);
-
-        if (SelectableTreeNode.is(node)) {
-            this.fireSelectionChanged(node, true);
+        try {
+            this._contextSelection = true;
+            super.handleContextMenuEvent(node, event);
+        } finally {
+            this._contextSelection = false;
         }
     }
 
