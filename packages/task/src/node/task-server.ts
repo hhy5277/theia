@@ -62,7 +62,7 @@ export class TaskServerImpl implements TaskServer {
             console.log('/// runner is null ');
         }
         const task = await runner.run(taskConfiguration, ctx);
-        console.log('/// after run task ');
+        console.log('/// after run task ' + JSON.stringify(task));
 
         task.onExit(event => {
             console.log('/// task is exit ');
