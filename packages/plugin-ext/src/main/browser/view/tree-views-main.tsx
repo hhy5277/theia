@@ -231,6 +231,8 @@ export class TreeViewDataProviderMain {
 @injectable()
 export class TreeViewWidget extends TreeWidget {
 
+    protected readonly onSelectionChangedEmitter = new Emitter<SelectionEventHandler>();
+
     constructor(
         @inject(TreeProps) readonly treeProps: TreeProps,
         @inject(TreeModel) readonly model: TreeModel,
@@ -259,7 +261,9 @@ export class TreeViewWidget extends TreeWidget {
         });
     }
 
-    protected readonly onSelectionChangedEmitter = new Emitter<SelectionEventHandler>();
+    dispose(): void {
+        this.onSelectionChangedEmitter.dispose();
+    }
 
     get onSelectionChanged(): Event<SelectionEventHandler> {
         return this.onSelectionChangedEmitter.event;
