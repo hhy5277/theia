@@ -80,10 +80,12 @@ export class HostedPluginSupport {
         if (this.pluginRunners.length > 0) {
             this.pluginRunners.forEach(runner => {
                 if (runner.acceptMessage(jsonMessage)) {
+                    console.log('!!! HostedPluginSupport onMessage  ==== runner.onMessage');
                     runner.onMessage(jsonMessage);
                 }
             });
         } else {
+            console.log('!!! HostedPluginSupport onMessage  ==== hostedPluginProcess.onMessage');
             this.hostedPluginProcess.onMessage(jsonMessage.content);
         }
     }
