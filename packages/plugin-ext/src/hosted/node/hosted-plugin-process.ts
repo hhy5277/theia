@@ -72,6 +72,7 @@ export class HostedPluginProcess implements ServerPluginRunner {
 
     // tslint:disable-next-line:no-any
     public onMessage(jsonMessage: any): void {
+        console.log('!!!!!!!!!!!!!!!!!!! HostedPluginProcess onMessage ' + JSON.stringify(jsonMessage));
         if (this.childProcess) {
             this.childProcess.send(JSON.stringify(jsonMessage));
         }

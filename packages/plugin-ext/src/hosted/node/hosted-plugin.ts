@@ -76,6 +76,7 @@ export class HostedPluginSupport {
         // need to perform routing
         // tslint:disable-next-line:no-any
         const jsonMessage: any = JSON.parse(message);
+        console.log('!!!!!!!!!!!!!!!!!!! HostedPluginSupport onMessage ' + message);
         if (this.pluginRunners.length > 0) {
             this.pluginRunners.forEach(runner => {
                 if (runner.acceptMessage(jsonMessage)) {
